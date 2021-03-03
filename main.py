@@ -8,25 +8,35 @@ import re
 from time import sleep
 
 
-def get_comments(bot, filename):
+def get_bot(login, password):
+    bot = Bot()
+    bot.login(username=login, password=password)
+    return bot
+
+
+def get_comments(bot):
     media_id = bot.get_media_id_from_link("https://www.instagram.com/p/BtON034lPhu/")
     comments = bot.get_media_comments_all(media_id)
-    with open(filename, "w", encoding="utf-8") as file:
-        json.dump(comments, file)
+    return comments
 
 
-def get_text_comment(file_path):
-    text_comments = []
-    with open(file_path, 'r') as f:
-        comments_data = json.loads(f.read())
-        for comments in comments_data:
-            text_comments.append(comments['text'])
-    return text_comments
+def get_comment_text(comments):
+    users_id = []
+    usernames = []
+    texts = []
+    for comment in comments:
+        text = comment['text']
+        user_id = comment['user_id']
+        username = comment['user']['username']
+        users_id.append(user_id)
+        usernames.append(username)
+        texts.append(text)
+    return users_id, usernames, texts
 
 
-def get_users(text_comments, regex):
+def get_marked_users(text_comment, regex):
     users = []
-    for text in text_comments:
+    for text in text_comment:
         result = re.findall(regex, text)
         users.append(result)
     return users
@@ -40,37 +50,24 @@ def is_user_exist(user_name, bot):
         return False
 
 
-def get_bot(login, password):
-    bot = Bot()
-    bot.login(username=login, password=password)
-    return bot
-
-
 if __name__ == "__main__":
     load_dotenv()
 
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
+    shutil.rmtree(path)
+
     login = os.getenv('INSTAGRAM_LOGIN')
     password = os.getenv('ISTAGRAM_PASSWORD')
-    bot = get_bot(login, password)
-    # get_comments(bot)
-    # with open("comments.json", "r") as my_file:
-    #     file_contents = my_file.read()
-    # print(file_contents)
-    #
     regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
-    comments_filename = 'comments.json'
-    all_marked_users = 'users.json'
+    bot = get_bot(login, password)
+    comments = get_comments(bot)
+    user_ids, usernames, texts = get_comment_text(comments)
+    marked_users = get_marked_users(texts, regex)
 
-    text_comments = get_text_comment(comments_filename)
-    marked_users = get_users(text_comments, regex)
-    # path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
-    # shutil.rmtree(path)
-
-    all_id = []
     for users in marked_users:
         for user_name in users:
-            fake_user = is_user_exist(user_name, bot)
-            print(fake_user)
+            real_user = is_user_exist(user_name, bot)
+            print(real_user)
 
 
 
