@@ -21,25 +21,20 @@ def get_comments(bot):
 
 
 def get_comment_text(comments):
-    users_id = []
-    usernames = []
-    texts = []
+    comments_data = []
     for comment in comments:
         text = comment['text']
         user_id = comment['user_id']
         username = comment['user']['username']
-        users_id.append(user_id)
-        usernames.append(username)
-        texts.append(text)
-    return users_id, usernames, texts
+        comments_data.append({'text': text,
+                              'user_id': user_id,
+                              "username": username})
+    return comments_data
 
 
 def get_marked_users(text_comment, regex):
-    users = []
-    for text in text_comment:
-        result = re.findall(regex, text)
-        users.append(result)
-    return users
+    result = re.findall(regex, text_comment)
+    return result
 
 
 def is_user_exist(user_name, bot):
@@ -48,6 +43,12 @@ def is_user_exist(user_name, bot):
         return True
     else:
         return False
+
+
+def is_user_like_post(bot):
+    media_id = bot.get_media_id_from_link("https://www.instagram.com/p/BtON034lPhu/")
+    media_likers = bot.get_media_likers(media_id)
+    return media_likers
 
 
 if __name__ == "__main__":
@@ -61,13 +62,22 @@ if __name__ == "__main__":
     regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
     bot = get_bot(login, password)
     comments = get_comments(bot)
-    user_ids, usernames, texts = get_comment_text(comments)
-    marked_users = get_marked_users(texts, regex)
 
-    for users in marked_users:
-        for user_name in users:
-            real_user = is_user_exist(user_name, bot)
-            print(real_user)
+    likers = is_user_like_post(bot)
+
+    socessfuly_comments = []
+    comments_data = get_comment_text(comments)
+    for comment in comments_data:
+        text = comment['text']
+        id = comment['user_id']
+        username = comment['username']
+        marked_users = get_marked_users(text, regex)
+        for user in marked_users:
+            real_user = is_user_exist(user, bot)
+            if real_user and user in likers:
+                socessfuly_comments.append((id, username))
+                print(id, 'Добавлен')
+
 
 
 
