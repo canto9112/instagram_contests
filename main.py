@@ -6,6 +6,7 @@ import shutil
 import json
 import re
 from time import sleep
+from itertools import groupby
 
 
 def get_bot(login, password):
@@ -14,10 +15,9 @@ def get_bot(login, password):
     return bot
 
 
-def get_comments(bot):
-    media_id = bot.get_media_id_from_link("https://www.instagram.com/p/BtON034lPhu/")
-    comments = bot.get_media_comments_all(media_id)
-    return comments
+def get_comments(bot, post_link):
+    media_id = bot.get_media_id_from_link(post_link)
+    return bot.get_media_comments_all(media_id)
 
 
 def get_comment_text(comments):
@@ -45,10 +45,29 @@ def is_user_exist(user_name, bot):
         return False
 
 
-def is_user_like_post(bot):
-    media_id = bot.get_media_id_from_link("https://www.instagram.com/p/BtON034lPhu/")
-    media_likers = bot.get_media_likers(media_id)
-    return media_likers
+def fulfilled_conditions_like(bot, post_link):
+    media_id = bot.get_media_id_from_link(post_link)
+    return bot.get_media_likers(media_id)
+
+
+def fulfilled_conditions_comment(bot, comments, regex):
+    comment_condition = []
+
+    comments_data = get_comment_text(comments)
+    for comment in comments_data:
+        text = comment['text']
+        id = comment['user_id']
+        username = comment['username']
+        marked_users = get_marked_users(text, regex)
+        for user in marked_users:
+            real_user = is_user_exist(user, bot)
+            if real_user:
+                comment_condition.extend((id, username))
+    return comment_condition
+
+
+def fulfilled_conditions_follower(bot, username):
+    return bot.get_user_followers(username)
 
 
 if __name__ == "__main__":
@@ -60,29 +79,16 @@ if __name__ == "__main__":
     login = os.getenv('INSTAGRAM_LOGIN')
     password = os.getenv('ISTAGRAM_PASSWORD')
     regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
+    like_condition_file = 'likers2.json'
+    comment_condition_file = 'comment_condition.json'
+    followers_condition_file = 'followers.json'
+    organizers_account = 'wowbeautybar.ru'
+    post_link = "https://www.instagram.com/p/BtON034lPhu/"
+    #
     bot = get_bot(login, password)
-    comments = get_comments(bot)
+    comments = get_comments(bot, post_link)
 
-    likers = is_user_like_post(bot)
-
-    socessfuly_comments = []
-    comments_data = get_comment_text(comments)
-    for comment in comments_data:
-        text = comment['text']
-        id = comment['user_id']
-        username = comment['username']
-        marked_users = get_marked_users(text, regex)
-        for user in marked_users:
-            real_user = is_user_exist(user, bot)
-            if real_user and user in likers:
-                socessfuly_comments.append((id, username))
-                print(id, 'Добавлен')
-
-
-
-
-
-
-
-
+    fulfilled_conditions_like(bot, post_link)
+    fulfilled_conditions_comment(bot, comments, regex)
+    fulfilled_conditions_follower(bot, organizers_account)
 
