@@ -1,12 +1,9 @@
-from instabot import Bot
-from pprint import pprint
 import os
-from dotenv import load_dotenv
-import shutil
-import json
 import re
-from time import sleep
-from itertools import groupby
+import shutil
+
+from dotenv import load_dotenv
+from instabot import Bot
 
 
 def get_bot(login, password):
