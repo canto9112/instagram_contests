@@ -15,7 +15,7 @@ pip3 install -r requirements.txt
 
 ### Как пользоваться скриптом
 
-Для работы скрипта нужно создать файл ```.env``` C переменными INSTAGRAM_LOGIN (логин от Instagram) и ISTAGRAM_PASSWORD (пароль от Instagram) 
+Для работы скрипта нужно создать файл ```.env``` с переменными INSTAGRAM_LOGIN (логин от Instagram) и ISTAGRAM_PASSWORD (пароль от Instagram) 
 в директории где лежит скрипт. Вставьте ваш логин/пароль в файл ```.env```:
 ```
 ISTAGRAM_PASSWORD = 'python3'
