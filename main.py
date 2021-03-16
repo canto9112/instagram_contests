@@ -1,4 +1,6 @@
+import argparse
 import os
+import random
 import re
 import shutil
 
@@ -42,50 +44,80 @@ def is_user_exist(user_name, bot):
         return False
 
 
-def fulfilled_conditions_like(bot, post_link):
+def get_media_likers(bot, post_link):
     media_id = bot.get_media_id_from_link(post_link)
     return bot.get_media_likers(media_id)
 
 
-def fulfilled_conditions_comment(bot, comments, regex):
+def get_users_who_markeds(bot, comments, regex):
     comment_condition = []
 
     comments_data = get_comment_text(comments)
     for comment in comments_data:
         text = comment['text']
         id = comment['user_id']
-        username = comment['username']
         marked_users = get_marked_users(text, regex)
         for user in marked_users:
             real_user = is_user_exist(user, bot)
             if real_user:
-                comment_condition.extend((id, username))
+                comment_condition.append(str(id))
     return comment_condition
 
 
-def fulfilled_conditions_follower(bot, username):
+def get_users_followers(bot, username):
     return bot.get_user_followers(username)
 
 
-if __name__ == "__main__":
-    load_dotenv()
+def get_username(bot, id):
+    return bot.get_username_from_user_id(id)
 
-    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
-    shutil.rmtree(path)
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        description='Описание что делает программа'
+    )
+    parser.add_argument('link', help='Ссылка на пост с розыгрышем')
+    parser.add_argument('account', help='Аккаунт организатора')
+    args = parser.parse_args()
+    return args.link, args.account
+
+
+def main():
+    load_dotenv()
 
     login = os.getenv('INSTAGRAM_LOGIN')
     password = os.getenv('ISTAGRAM_PASSWORD')
+
     regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
-    like_condition_file = 'likers2.json'
-    comment_condition_file = 'comment_condition.json'
-    followers_condition_file = 'followers.json'
-    organizers_account = 'wowbeautybar.ru'
-    post_link = "https://www.instagram.com/p/BtON034lPhu/"
-    #
+
+    post_link, organizers_account = get_args()
+
     bot = get_bot(login, password)
     comments = get_comments(bot, post_link)
 
-    fulfilled_conditions_like(bot, post_link)
-    fulfilled_conditions_comment(bot, comments, regex)
-    fulfilled_conditions_follower(bot, organizers_account)
+    markeds = set(get_users_who_markeds(bot, comments, regex))
+    likers = set(get_media_likers(bot, post_link))
+    followers = set(get_users_followers(bot, organizers_account))
+
+    unic_users = markeds & likers & followers
+    winners_ids = random.choice(list(unic_users))
+    winner_username = get_username(bot, winners_ids)
+    print('Выйграл участник с именем -', winner_username)
+
+
+if __name__ == "__main__":
+    try:
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
+        shutil.rmtree(path)
+        main()
+    except FileNotFoundError:
+        main()
+
+
+
+
+
+
+
+
 
