@@ -3,6 +3,7 @@ import os
 import random
 import re
 import shutil
+from pathlib import Path
 
 from dotenv import load_dotenv
 from instabot import Bot
@@ -84,10 +85,10 @@ def get_args():
 
 def main():
     load_dotenv()
-    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
 
-    if path:
-        shutil.rmtree(path)
+    instabot_config = Path('config')
+    if instabot_config.exists():
+        shutil.rmtree(instabot_config)
 
     login = os.getenv('INSTAGRAM_LOGIN')
     password = os.getenv('ISTAGRAM_PASSWORD')
