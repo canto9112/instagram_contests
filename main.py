@@ -29,7 +29,7 @@ def get_comments_data(comments):
     return comments_data
 
 
-def is_user_exist(user_name, bot):
+def fetch_real_user(user_name, bot):
     return bot.get_user_id_from_username(user_name)
 
 
@@ -47,7 +47,7 @@ def get_users_who_markeds(bot, comments, regex):
         id = comment['user_id']
         marked_users = re.findall(regex, text)
         for user in marked_users:
-            real_user = is_user_exist(user, bot)
+            real_user = fetch_real_user(user, bot)
             if real_user:
                 comment_condition.append(str(id))
     return comment_condition
