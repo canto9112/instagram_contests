@@ -17,7 +17,7 @@ def get_comments(post_link, login, password):
     return bot, comments
 
 
-def get_comment_text(comments):
+def get_comments_data(comments):
     comments_data = []
     for comment in comments:
         text = comment['text']
@@ -41,7 +41,7 @@ def get_media_likers(bot, post_link):
 def get_users_who_markeds(bot, comments, regex):
     comment_condition = []
 
-    comments_data = get_comment_text(comments)
+    comments_data = get_comments_data(comments)
     for comment in comments_data:
         text = comment['text']
         id = comment['user_id']
