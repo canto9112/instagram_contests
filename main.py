@@ -9,15 +9,12 @@ from dotenv import load_dotenv
 from instabot import Bot
 
 
-def get_bot(login, password):
+def get_comments(post_link, login, password):
     bot = Bot()
     bot.login(username=login, password=password)
-    return bot
-
-
-def get_comments(bot, post_link):
     media_id = bot.get_media_id_from_link(post_link)
-    return bot.get_media_comments_all(media_id)
+    comments = bot.get_media_comments_all(media_id)
+    return bot, comments
 
 
 def get_comment_text(comments):
@@ -30,11 +27,6 @@ def get_comment_text(comments):
                               'user_id': user_id,
                               "username": username})
     return comments_data
-
-
-def get_marked_users(text_comment, regex):
-    result = re.findall(regex, text_comment)
-    return result
 
 
 def is_user_exist(user_name, bot):
@@ -57,20 +49,12 @@ def get_users_who_markeds(bot, comments, regex):
     for comment in comments_data:
         text = comment['text']
         id = comment['user_id']
-        marked_users = get_marked_users(text, regex)
+        marked_users = re.findall(regex, text)
         for user in marked_users:
             real_user = is_user_exist(user, bot)
             if real_user:
                 comment_condition.append(str(id))
     return comment_condition
-
-
-def get_users_followers(bot, username):
-    return bot.get_user_followers(username)
-
-
-def get_username(bot, id):
-    return bot.get_username_from_user_id(id)
 
 
 def get_args():
@@ -97,16 +81,15 @@ def main():
 
     post_link, organizers_account = get_args()
 
-    bot = get_bot(login, password)
-    comments = get_comments(bot, post_link)
+    bot, comments = get_comments(post_link, login, password)
 
     markeds = set(get_users_who_markeds(bot, comments, regex))
     likers = set(get_media_likers(bot, post_link))
-    followers = set(get_users_followers(bot, organizers_account))
+    followers = set(bot.get_user_followers(organizers_account))
 
     unic_users = markeds & likers & followers
-    winners_ids = random.choice(list(unic_users))
-    winner_username = get_username(bot, winners_ids)
+    winner_id = random.choice(list(unic_users))
+    winner_username = bot.get_username_from_user_id(winner_id)
     print('Выйграл участник с именем -', winner_username)
 
 
