@@ -33,9 +33,9 @@ def fetch_real_user(user_name, bot):
     return bot.get_user_id_from_username(user_name)
 
 
-def get_media_likers(bot, post_link):
-    media_id = bot.get_media_id_from_link(post_link)
-    return bot.get_media_likers(media_id)
+def get_likers_ids(bot, post_link):
+    media_ids = bot.get_media_id_from_link(post_link)
+    return bot.get_media_likers(media_ids)
 
 
 def get_users_who_markeds(bot, comments, regex):
@@ -80,10 +80,10 @@ def main():
     bot, comments = get_comments(post_link, login, password)
 
     markeds = set(get_users_who_markeds(bot, comments, regex))
-    likers = set(get_media_likers(bot, post_link))
+    likers_ids = set(get_likers_ids(bot, post_link))
     followers = set(bot.get_user_followers(organizers_account))
 
-    unic_users = markeds & likers & followers
+    unic_users = markeds & likers_ids & followers
     winner_id = random.choice(list(unic_users))
     winner_username = bot.get_username_from_user_id(winner_id)
     print('Выйграл участник с именем -', winner_username)
