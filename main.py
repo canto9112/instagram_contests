@@ -84,10 +84,14 @@ def get_args():
 
 def main():
     load_dotenv()
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
+
+    if path:
+        shutil.rmtree(path)
 
     login = os.getenv('INSTAGRAM_LOGIN')
     password = os.getenv('ISTAGRAM_PASSWORD')
-
+    # Регулярное выражение для определения отмеченных пользователей
     regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
 
     post_link, organizers_account = get_args()
@@ -106,12 +110,7 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config')
-        shutil.rmtree(path)
-        main()
-    except FileNotFoundError:
-        main()
+    main()
 
 
 
