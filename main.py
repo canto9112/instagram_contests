@@ -30,11 +30,7 @@ def get_comment_text(comments):
 
 
 def is_user_exist(user_name, bot):
-    media_id = bot.get_user_id_from_username(user_name)
-    if media_id:
-        return True
-    else:
-        return False
+    return bot.get_user_id_from_username(user_name)
 
 
 def get_media_likers(bot, post_link):
