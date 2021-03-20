@@ -62,16 +62,17 @@ def main():
     login = os.getenv('INSTAGRAM_LOGIN')
     password = os.getenv('ISTAGRAM_PASSWORD')
 
+    # Регулярное выражение для определения отмеченных пользователей.
+    # Этот regex взят из статьи:
+    # https://blog.jstassen.com/2016/03/code-regex-for-instagram-username-and-hashtags/#The%20RegEx
+    regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
+
     bot = Bot()
     bot.login(username=login, password=password)
 
     instabot_config = Path('config')
     if instabot_config.exists():
         shutil.rmtree(instabot_config)
-
-
-    # Регулярное выражение для определения отмеченных пользователей
-    regex = "(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)"
 
     post_link, organizers_account = get_args()
 
