@@ -29,10 +29,6 @@ def get_comments_data(comments):
     return comments_data
 
 
-def fetch_real_user(user_name, bot):
-    return bot.get_user_id_from_username(user_name)
-
-
 def get_likers_ids(bot, post_link):
     media_ids = bot.get_media_id_from_link(post_link)
     return bot.get_media_likers(media_ids)
@@ -47,7 +43,7 @@ def get_users_who_markeds(bot, comments, regex):
         id = comment['user_id']
         marked_users = re.findall(regex, text)
         for user in marked_users:
-            real_user = fetch_real_user(user, bot)
+            real_user = bot.get_user_id_from_username(user)
             if real_user:
                 comment_condition.append(str(id))
     return comment_condition
