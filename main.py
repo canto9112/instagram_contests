@@ -12,7 +12,7 @@ from instabot import Bot
 def get_comments(bot, post_link):
     media_id = bot.get_media_id_from_link(post_link)
     comments = bot.get_media_comments_all(media_id)
-    return bot, comments
+    return comments
 
 
 def get_comments_data(comments):
